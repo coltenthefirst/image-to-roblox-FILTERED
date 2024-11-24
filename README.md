@@ -129,7 +129,7 @@ For obtaining direct image urls, I recommended to use [Postimages.org](https://p
 **A:** Uploaded images are temporary logged, they cannot be downloaded, viewed, or anything, unless its in Roblox.
 
 **Q: What type images does this filter?**  
-**A:** Gore, Violence, and Sexual Content. Cuss words are not filtered yet.
+**A:** Gore, Violence, Sexual Content, and Cuss Word types too.
 
 **Q: What are the chances of a image bypassing detection?**  
 **A:** A probability range of 5% to 12%.
