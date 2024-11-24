@@ -32,7 +32,7 @@ limitations under the License.
     <a href="https://github.com/coltenthefirst/image-to-roblox">
         <img alt="License Info" src="https://img.shields.io/badge/License-MIT-blue.svg">
     </a>
-    <a href="https://github.com/coltenthefirst/image-to-roblox/releases">
+    <a href="https://github.com/coltenthefirst/image-to-roblox-FILTERED/releases">
         <img alt="Newest Release" src="https://img.shields.io/github/release/coltenthefirst/image-to-roblox-FILTERED.svg">
     </a>
 </h1>
