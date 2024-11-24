@@ -99,6 +99,8 @@ def send_image():
             text_result = text_response.json()
             profanities = text_result.get("text", {}).get("profanity", [])
 
+            offensive_types = text_result.get("offensive", {})
+
             high_intensity_discriminatory = any(
                 profanity.get("type") == "discriminatory" and profanity.get("intensity") == "high"
                 for profanity in profanities
@@ -109,13 +111,21 @@ def send_image():
                 for profanity in profanities
             )
 
-            offensive_types = text_result.get("offensive", {})
-
-            if high_intensity_discriminatory or offensive_detected or any(
-                offensive_types.get(key, 0) > 0.05 for key in offensive_types
-            ):
+            if any(offensive_types.get(key, 0) > 0.05 for key in offensive_types):
                 subprocess.run(["python3", "NSFW.py"])
                 return jsonify({"message": "Offensive content detected. NSFW script executed."}), 400
+
+            for profanity in profanities:
+                if profanity.get("intensity") == "high" and profanity.get("type") in ["sexual", "discriminatory"]:
+                    subprocess.run(["python3", "NSFW.py"])
+                    return jsonify({"message": "High-intensity offensive or sexual content detected. NSFW script executed."}), 400
+
+            harmful_categories = ["violence", "extremism", "self-harm", "drugs", "weapon", "terrorist"]
+            for category in harmful_categories:
+                if category in text_result.get("text", {}):
+                    subprocess.run(["python3", "NSFW.py"])
+                    return jsonify({"message": f"{category.capitalize()} content detected. NSFW script executed."}), 400
+
         else:
             return jsonify({
                 "error": f"Text API request failed with status code {text_response.status_code}",
