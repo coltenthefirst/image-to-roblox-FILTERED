@@ -93,15 +93,14 @@ Here’s a overview of the process:
 [Model-2](https://www.youtube.com/watch?v=6pRmz4_hoDo)
 
 ## Game Links
-- [Create Your Dreams](https://www.roblox.com/games/128560311364952/Create-Your-Dreams)
+- [Create Your Dreams](https://www.roblox.com/games/128560311364952/Create-Your-Dreams) (unfiltered btw)
 
 
 You can download the place files here:
 
 | Model / Update                            | Download |
 |------------------------------------|--------|
-| Update 1/Model-1: |[Google Drive Link](https://drive.google.com/file/d/1YdDMn-is_UD_VkbfgQKzQ3mzjJb5QZHY/view?usp=sharing)|
-| Update 2/Model-2: |[Google Drive Link](https://drive.google.com/file/d/1GUnPJWO0sX8VsMysFi1eTUbYXyJKcshk/view?usp=sharing)|
+| Update 2/Model-2 (FILTERED VERSION): |[Google Drive Link](https://drive.google.com/file/d/1aW_yDFl51jWNuYRXIWO-meuBk5S-00I3/view?usp=sharing)|
 
 
 ## Uploading Custom Images
