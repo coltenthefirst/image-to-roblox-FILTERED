@@ -123,25 +123,30 @@ def send_image():
                 return jsonify({"status": "success", "message": "NSFW script executed"}), 200
             else:
                 return jsonify({"status": "error", "message": "Error executing NSFW script"}), 500
+
+        elif classification == "SFW":
+            os.makedirs(INPUT_FOLDER, exist_ok=True)
+            image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
+
+            if not save_image_from_url(image_url, image_path):
+                return jsonify({"status": "error", "message": "Failed to download image"}), 400
+
+            if not run_script(SCRIPT_MAPPING.get(button_clicked)):
+                return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
+
+            output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
+            os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+            lua_script = get_lua_script(output_file)
+            if lua_script:
+                return jsonify({"status": "success", "lua_script": lua_script})
+            else:
+                return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
+
+        else:
+            return jsonify({"status": "error", "message": "Image classification is uncertain"}), 400
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-
-    os.makedirs(INPUT_FOLDER, exist_ok=True)
-    image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
-
-    if not save_image_from_url(image_url, image_path):
-        return jsonify({"status": "error", "message": "Failed to download image"}), 400
-
-    if not run_script(SCRIPT_MAPPING.get(button_clicked)):
-        return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
-
-    output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
-    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-    lua_script = get_lua_script(output_file)
-    if lua_script:
-        return jsonify({"status": "success", "lua_script": lua_script})
-    else:
-        return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
