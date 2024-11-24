@@ -96,7 +96,12 @@ def send_image():
         text_response = requests.get(text_api_url, params=text_api_params)
         if text_response.status_code == 200:
             text_result = text_response.json()
+            text_content = text_result.get("text", {}).get("text", "")
             profanities = text_result.get("text", {}).get("profanity", [])
+
+            print("Text Analysis Result:")
+            print("Text Content:", text_content)
+            print("Profanities Detected:", profanities)
 
             high_intensity_discriminatory = any(
                 profanity.get("type") == "discriminatory" and profanity.get("intensity") == "high"
