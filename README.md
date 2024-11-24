@@ -24,6 +24,10 @@ limitations under the License.
     ~ Works For IOS, Android, Windows, Mac, and Console. ~
 </h6>
 
+<h6 align="center">
+    ~ Please note that some images can get bypassed.. ~
+</h6>
+
 <h1 align="center">
     <a href="https://github.com/coltenthefirst/image-to-roblox">
         <img alt="License Info" src="https://img.shields.io/badge/License-MIT-blue.svg">
@@ -124,6 +128,12 @@ For obtaining direct image urls, I recommended to use [Postimages.org](https://p
 
 **Q: Do my uploaded images get logged?**  
 **A:** Uploaded images are temporary logged, they cannot be downloaded, viewed, or anything, unless its in Roblox.
+
+**Q: What type images does this filter?**  
+**A:** Gore, Violence, and Sexual Content. Cuss words are not filtered yet.
+
+**Q: What are the chances of a image bypassing detection?**  
+**A:** A probability range of 5% to 12%.
 
 ## License
 This project is licensed under the MIT License. You are free to use, modify, and distribute the files in this repository, as long as you include the original license. For more details, see the [LICENSE](LICENSE) file.
