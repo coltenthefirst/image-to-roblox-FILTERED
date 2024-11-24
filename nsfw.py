@@ -1,1 +1,0 @@
-print("Image is NSFW")
