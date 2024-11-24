@@ -1,6 +1,8 @@
 import os
+import subprocess
 from flask import Flask, request, jsonify
 import requests
+import json
 
 app = Flask(__name__)
 
@@ -21,7 +23,6 @@ SCRIPT_MAPPING = {
 }
 
 def classify_image(image_url):
-    """Classify an image using the NSFW API."""
     api_data = {"url": image_url}
     try:
         response = requests.post(NSFW_API_URL, data=api_data)
@@ -43,71 +44,85 @@ def classify_image(image_url):
         raise Exception(f"Classification error: {str(e)}")
 
 def save_image_from_url(image_url, image_path):
-    """Download and save the image from a URL."""
     for attempt in range(MAX_RETRIES):
         try:
-            print(f"Attempting to download image (Attempt {attempt + 1})")
             response = requests.get(image_url)
             if response.status_code == 200:
                 os.makedirs(os.path.dirname(image_path), exist_ok=True)
                 with open(image_path, 'wb') as f:
                     f.write(response.content)
-                print(f"Image saved to {image_path}")
                 return True
             else:
-                print(f"Failed to download image: {response.status_code} {response.text}")
                 if response.status_code == 503 and attempt < MAX_RETRIES - 1:
-                    print("Retrying...")
                     continue
                 return False
         except Exception as e:
-            print(f"Error downloading image: {e}")
             return False
 
 def run_script(script_name):
-    """Run the specified script."""
     script_path = os.path.join(SCRIPT_DIR, script_name)
     try:
-        print(f"Executing script: {script_name}")
         os.system(f"python3 {script_path}")
         return True
     except Exception as e:
-        print(f"Error running script: {e}")
         return False
 
 def get_lua_script(output_file):
-    """Read the Lua script from the output file."""
     try:
         with open(output_file, 'r') as f:
             lua_script = f.read()
-        print(f"Successfully read Lua script from {output_file}")
         return lua_script
     except Exception as e:
-        print(f"Error reading output Lua file: {e}")
         return None
 
 @app.route('/send_image', methods=['POST'])
 def send_image():
-    print("Received POST request to /send_image")
     data = request.get_json()
 
     if not data or not data.get('image_url') or not data.get('button_clicked'):
-        print("Error: Missing image_url or button_clicked")
         return jsonify({"status": "error", "message": "Missing image_url or button_clicked"}), 400
 
     image_url = data['image_url']
     button_clicked = data['button_clicked']
     
+    text_api_url = "https://api.sightengine.com/1.0/check.json"
+    text_api_params = {
+        "models": "text-content",
+        "api_user": "1726990225",
+        "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
+        "url": image_url
+    }
+
+    try:
+        text_response = requests.get(text_api_url, params=text_api_params)
+        if text_response.status_code == 200:
+            text_result = text_response.json()
+            profanities = text_result.get("text", {}).get("profanity", [])
+
+            high_intensity_discriminatory = any(
+                profanity.get("type") == "discriminatory" and profanity.get("intensity") == "high"
+                for profanity in profanities
+            )
+
+            if high_intensity_discriminatory:
+                subprocess.run(["python3", "NSFW.py"])
+                return jsonify({"message": "High-intensity discriminatory text detected. NSFW script executed."}), 400
+        else:
+            return jsonify({
+                "error": f"Text API request failed with status code {text_response.status_code}",
+                "details": text_response.text
+            }), 500
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
     try:
         classification, nsfw_score, sfw_score = classify_image(image_url)
-        print(f"Image classified as {classification}: NSFW Score = {nsfw_score}%, SFW Score = {sfw_score}%")
         
         if classification == "NSFW":
             if run_script(SCRIPT_MAPPING['nsfw']):
                 return jsonify({"status": "success", "message": "NSFW script executed"}), 200
             else:
                 return jsonify({"status": "error", "message": "Error executing NSFW script"}), 500
-
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
