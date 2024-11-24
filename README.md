@@ -40,7 +40,7 @@ limitations under the License.
 </p>
 
 <h1 align="center">
-    Images To Roblox Parts
+    Images To Roblox Parts (NSFW DETECTOR VERSION)
 </h1>
 
 <br>
@@ -59,7 +59,7 @@ This repository contains the backend source code for the **Image To Parts** Robl
 Here’s a overview of the process:
 1. Input an image URL and select a quality setting (such as mid, high, low, extra low).
 2. The image URL and selected quality are sent to **Vercel**.
-3. Vercel downloads the image and runs a Python script based on your selection.
+3. Vercel checks the image for nsfw and if its sfw than Vercel downloads the image and runs a Python script based on your selection.
 4. A Lua script is generated and sent back to Roblox, where it is processed into parts that resemble the pixels of your image.
 
 ## To-Do List
@@ -122,14 +122,8 @@ For obtaining direct image urls, I recommended to use [Postimages.org](https://p
 
 ## FAQ
 
-**Q: Does this have a NSFW filter**  
-**A:** No. If I knew how to make a NSFW filter for this, I would've made one.
-
 **Q: Do my uploaded images get logged?**  
 **A:** Uploaded images are temporary logged, they cannot be downloaded, viewed, or anything, unless its in Roblox.
-
-**Q: Will I get banned for using exploit images?**  
-**A:** I said before that you won't be banned, but you can be banned. Please be careful when using this in your games.
 
 ## License
 This project is licensed under the MIT License. You are free to use, modify, and distribute the files in this repository, as long as you include the original license. For more details, see the [LICENSE](LICENSE) file.
