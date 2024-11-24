@@ -87,7 +87,7 @@ def send_image():
     
     text_api_url = "https://api.sightengine.com/1.0/check.json"
     text_api_params = {
-        "models": "text-content",
+        "models": "offensive,text-content",
         "api_user": "1726990225",
         "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
         "url": image_url
@@ -104,9 +104,14 @@ def send_image():
                 for profanity in profanities
             )
 
-            if high_intensity_discriminatory:
+            offensive_detected = any(
+                profanity.get("type") == "offensive"
+                for profanity in profanities
+            )
+
+            if high_intensity_discriminatory or offensive_detected:
                 subprocess.run(["python3", "NSFW.py"])
-                return jsonify({"message": "High-intensity discriminatory text detected. NSFW script executed."}), 400
+                return jsonify({"message": "Offensive content detected. NSFW script executed."}), 400
         else:
             return jsonify({
                 "error": f"Text API request failed with status code {text_response.status_code}",
