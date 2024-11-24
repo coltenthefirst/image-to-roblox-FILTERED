@@ -86,7 +86,7 @@ def send_image():
     
     text_api_url = "https://api.sightengine.com/1.0/check.json"
     text_api_params = {
-        "models": "text-content",
+        "models": "offensive,text-content",
         "api_user": "1726990225",
         "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
         "url": image_url
@@ -98,9 +98,19 @@ def send_image():
             text_result = text_response.json()
             profanities = text_result.get("text", {}).get("profanity", [])
 
-            for profanity in profanities:
-                if profanity.get("intensity") == "high" and profanity.get("type") in ["sexual"]:
-                    return jsonify({"message": "NSFW text detected. Image is flagged as NSFW."}), 400
+            high_intensity_discriminatory = any(
+                profanity.get("type") == "discriminatory" and profanity.get("intensity") == "high"
+                for profanity in profanities
+            )
+
+            offensive_detected = any(
+                profanity.get("type") == "offensive" or profanity.get("type") == "sexual"
+                for profanity in profanities
+            )
+
+            if high_intensity_discriminatory or offensive_detected:
+                subprocess.run(["python3", "NSFW.py"])
+                return jsonify({"message": "Offensive or sexual content detected. NSFW script executed."}), 400
         else:
             return jsonify({
                 "error": f"Text API request failed with status code {text_response.status_code}",
@@ -114,7 +124,7 @@ def send_image():
         
         if classification == "NSFW":
             if run_script(SCRIPT_MAPPING['nsfw']):
-                return jsonify({"status": "success", "message": "NSFW image detected. NSFW script executed."}), 200
+                return jsonify({"status": "success", "message": "NSFW script executed"}), 200
             else:
                 return jsonify({"status": "error", "message": "Error executing NSFW script"}), 500
 
