@@ -105,11 +105,15 @@ def send_image():
             )
 
             offensive_detected = any(
-                profanity.get("type") == "offensive"
+                profanity.get("type") == "offensive" or profanity.get("type") == "sexual"
                 for profanity in profanities
             )
 
-            if high_intensity_discriminatory or offensive_detected:
+            offensive_types = text_result.get("offensive", {})
+
+            if high_intensity_discriminatory or offensive_detected or any(
+                offensive_types.get(key, 0) > 0.05 for key in offensive_types
+            ):
                 subprocess.run(["python3", "NSFW.py"])
                 return jsonify({"message": "Offensive content detected. NSFW script executed."}), 400
         else:
