@@ -25,7 +25,7 @@ limitations under the License.
 </h6>
 
 <h6 align="center">
-    ~ Please note that some images can get bypassed.. ~
+    ~ Please note that some images can get bypassed. ~
 </h6>
 
 <h1 align="center">
