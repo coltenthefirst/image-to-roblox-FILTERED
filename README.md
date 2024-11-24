@@ -134,6 +134,23 @@ For obtaining direct image urls, I recommended to use [Postimages.org](https://p
 **Q: What are the chances of a image bypassing detection?**  
 **A:** A probability range of 5% to 12%.
 
+# Exploit Content Model:
+https://api4.ai/apis/nsfw
+```
+curl -X GET -G 'https://api.sightengine.com/1.0/check.json' \
+    -d 'models=text-content' \
+    -d 'api_user=1726990225&api_secret=YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx' \
+    --data-urlencode 'url=https://sightengine.com/assets/img/examples/example7.jpg'
+```
+
+# Exploit Words Model:
+https://dashboard.sightengine.com/getstarted
+```
+curl -X "POST" \
+  "https://demo.api4ai.cloud/nsfw/v1/results" \
+  -F "url=https://storage.googleapis.com/api4ai-static/samples/nsfw-1.jpg"
+```
+
 ## License
 This project is licensed under the MIT License. You are free to use, modify, and distribute the files in this repository, as long as you include the original license. For more details, see the [LICENSE](LICENSE) file.
 
