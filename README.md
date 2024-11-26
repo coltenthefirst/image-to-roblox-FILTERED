@@ -55,7 +55,7 @@ limitations under the License.
   <br/>
 </p>
 
-# THERE IS A ISSUE WITH MODEL-2! PLEASE READ [fix](https://github.com/coltenthefirst/image-to-roblox/issues/5) TO FIX IT!
+# THERE IS A ISSUE WITH MODEL-2F! PLEASE READ [fix](https://github.com/coltenthefirst/image-to-roblox/issues/5) TO FIX IT!
 
 ## Introduction
 
