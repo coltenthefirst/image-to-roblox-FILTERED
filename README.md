@@ -14,20 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-## This Source Code Is Really Outdated... Updating Very Soon!
+<h1 align="center">
+    ~ Model-3F Coming Dec 13th (2 Days) ~
+</h2>
+
+<h2 align="center">
+    ~ Please note that Model-3F is not released yet. I just have stuff already here when it comes out. ~
+</h2>
 
 <p align="center">
-  <img alt="Images To Roblox Parts" src="https://i.postimg.cc/MGx8XrT6/Roblox-Logo-2022.jpg" width="422" height="422" style="max-width: 100%;">
+  <img alt="asset" src="https://cdn.vectorstock.com/i/500p/16/54/checkerboard-black-and-white-background-vector-33401654.jpg" width="5000" height="10" style="max-width: 100%;">
+  <br/>
+  <br/>
+</p>
+
+<p align="center">
+  <img alt="Images To Roblox Parts" src="https://i.postimg.cc/mDfm6ydS/Untitled86-20241130213821.png" width="422" height="422" style="max-width: 100%;">
   <br/>
   <br/>
 </p>
 
 <h6 align="center">
-    ~ Works For IOS, Android, Windows, Mac, and Console. ~
-</h6>
-
-<h6 align="center">
-    ~ Please note that some images can get bypassed. ~
+    ~ Made with Lua, Python, Flask, and Vercel! ~
 </h6>
 
 <h1 align="center">
@@ -36,6 +44,10 @@ limitations under the License.
     </a>
     <a href="https://github.com/coltenthefirst/image-to-roblox-FILTERED/releases">
         <img alt="Newest Release" src="https://img.shields.io/github/release/coltenthefirst/image-to-roblox-FILTERED.svg">
+    </a>
+    </a>
+        <a href="https://vercel.com/">
+        <img alt="Vercel Deploy Status" src="https://deploy-badge.vercel.app/?url=https%3A%2F%2Fvercel.com%2Fcoltenthefirsts-projects%2Fimage-to-roblox-filtered&logo=Vercel&name=Vercel+%28image-to-roblox-filtered%29">
     </a>
 </h1>
 
@@ -57,7 +69,7 @@ limitations under the License.
   <br/>
 </p>
 
-# THERE IS A ISSUE WITH MODEL-2F! PLEASE READ [fix](https://github.com/coltenthefirst/image-to-roblox/issues/5) TO FIX IT!
+#### If you use Model-2. Please read this: [fix](https://github.com/coltenthefirst/image-to-roblox/issues/5)
 
 ## Introduction
 
@@ -76,13 +88,12 @@ Here’s a overview of the process:
     ~ EXPECT THESE TO CHANGE!!! ~
 </h6>
 
-### Current Tasks
+### Current Tasks (IN ORDER) - Model-3 Planned
 
-- [ ] PlaceHolder
+- [ ] NSFW Filter Model-3 (Github/Model-3F) - Last thing I will do is this.
 
 ### Completed Tasks
 
-- [x] NSFW Filter (Github/Model-2F)
 - [x] Frame By Frame Animation Player (Model-2)
 - [x] Faster Image Gen Speed (Model-2)
 - [x] Enhanced image data privacy (Github)
@@ -91,13 +102,32 @@ Here’s a overview of the process:
 - [x] Add a delete button for parts (Model-2)
 - [x] Fix Error 500 (Github/Model-2)
 - [x] Resolve issue with the first pixel not generating (Model-2)
+- [x] Updated README.md (Github) - released
+
+### Completed Tasks Since Model-2 Released
+
+- [x] Automatic Frame By Frame Animation Player (Github/Model-3) - unreleased
+###### ↑ Context: This will import the frames for you, and all you have to do is put in a gif url.
+- [x] NSFW Filter (Github/Model-2F) - released
+- [x] Making A Logo (Github) - released
+- [x] Color Filters (Model-3) - unreleased
+- [x] More Customizable Image Options (Model-3) - unreleased
+- [x] Fix The Frame By Frame Animation Player Bug (Model-3) - unreleased
+- [x] Fix Other Bugs (Github/Model-3) - unreleased
+- [x] Updated README.md #2 (Github) - released
+- [x] Boring Website (Other) - released
 
 ## Videos
-[Model-1](https://www.youtube.com/watch?v=oFm_znA53r8)
-[Model-2](https://www.youtube.com/watch?v=6pRmz4_hoDo)
+| Info                            | Video |
+|------------------------------------|--------|
+| Model-1 Release: |[Model-1 YouTube Link](https://www.youtube.com/watch?v=oFm_znA53r8)|
+| Model-2 Release: |[Model-2 YouTube Link](https://www.youtube.com/watch?v=6pRmz4_hoDo)|
+| Vercel Setup Tutorial: |[Vercel Setup Tutorial YouTube Link](https://youtu.be/RcwPO3fshEU)|
 
-## Game Links
-- [Create Your Dreams](https://www.roblox.com/games/128560311364952/Create-Your-Dreams) (unfiltered btw)
+## Game Link
+| Name                            | Link |
+|------------------------------------|--------|
+| Create Your Dreams: |[Create Your Dreams Roblox Link](https://www.roblox.com/games/128560311364952/Create-Your-Dreams)|
 
 
 You can download the place files here:
@@ -111,32 +141,76 @@ You can download the place files here:
 For obtaining direct image urls, I recommended to use [Postimages.org](https://postimages.org/) to obtain a direct link. Other services can be used as long as they provide a direct link.
 
 ## Tested Image Services
-- ✅ = Works
-- ❌ = Does not work
+### ✅ Recommended (Works)
+#### Free, No Account Needed
+- **[Postimages.org](https://postimages.org/)** — *Highly recommended*. Supports GIF uploads.
+- **[imgbb.com](https://imgbb.com/)** — *Highly recommended*. Supports GIF uploads.
+- [imghippo.com](https://imghippo.com/) — Supports GIF uploads.
+- [imgbox.com](https://imgbox.com/) — Supports GIF uploads.
+- [lunapic.com](https://www7.lunapic.com/editor/?action=quick-upload) — Supports GIF uploads.
+- [imagevenue.com](https://www.imagevenue.com/) — Supports GIF uploads.
+- [pictr.com](https://pictr.com/upload) — Supports GIF uploads.
+- [imagebam.com](https://www.imagebam.com/) — Supports GIF uploads.
+- [imgbly.com](https://imgbly.com/) — Supports GIF uploads.
+- [picsur.org](https://picsur.org/upload) — Supports GIF uploads.
+- [pixhost.to](https://pixhost.to/) — Supports GIF uploads.
 
-| Service                            | Status |
-|------------------------------------|--------|
-| [Postimages.org](https://postimages.org/)      | ✅     |
-| [imgbb.com](https://imgbb.com/)                | ✅     |
-| [i.imghippo.com](https://i.imghippo.com)       | ✅     |
-| [i.imgur.com](https://i.imgur.com)             | ❌     |
-| [imgbox.com](https://imgbox.com/)              | ✅     |
-| [snipboard.io](https://snipboard.io/)          | ✅     |
-| [prnt.sc](https://prnt.sc/)                    | ❌     |
-| [lunapic.com](https://www7.lunapic.com/editor/?action=quick-upload) | ✅     |
-| [imagevenue.com](https://www.imagevenue.com/)  | ✅     |
-| [pictr.com](https://pictr.com/upload)          | ✅     |
+#### Free, But Limited Functionality
+- **[snipboard.io](https://snipboard.io/)** — Does *not* support GIF uploads.
+
+### ❌ Not Recommended (Does Not Work)
+
+- [i.imgur.com](https://i.imgur.com/) — Direct Links Are Broken
+- [prnt.sc](https://prnt.sc/) — Direct Links Are Broken
+- [freeimage.host](https://freeimage.host/) — Direct Links Are Broken
+- [dropbox.com](https://www.dropbox.com/) — Direct Links Are Broken
+- [imghostr.com](https://imghostr.com/) — Direct Links Are Broken
+
+
 
 ## FAQ
 
-**Q: Do my uploaded images get logged?**  
+**Q: Do my uploaded images get logged? (All Models and Github)**
+######
 **A:** Uploaded images are temporary logged, they cannot be downloaded, viewed, or anything, unless its in Roblox.
 
-**Q: What type images does this filter?**  
+##### -
+
+**Q: What type images does this filter? (All Models and Github)**
+######
 **A:** Gore, Violence, Sexual Content, and Cuss Word types too.
 
-**Q: What are the chances of a image bypassing detection?**  
+##### -
+
+**Q: What are the chances of a image bypassing detection? (Other)**
+######
 **A:** A probability range of 5% to 12%.
+
+##### -
+
+**Q: Why is the send gif function split into different files? (Model-3F and Above)**
+######
+**A:** Since this whole project is free, I can't edit the timeout time. So I spit the send gif function into different files, so it wouldn't timeout when uploading the frames. 
+
+##### -
+
+**Q: Why is the animation player not working? (Model-2F)**
+######
+**A:** Please read this: [fix](https://github.com/coltenthefirst/image-to-roblox/issues/5)
+
+##### -
+
+**Q: Why is the animation player not working? (Model-3F)**
+######
+**A:** Sometimes the api key can get rate limited and for it to work again, you would have to wait a hour. Or you can make another api key, delete the old one, and use the new one. I don't have a fix for this yet but, I could make it send to another image hoster, or I could make a script that checks if the api key works or not, and if it doesn't than what it would do is use another api key. I will fix this in Model-3.5.
+
+##### -
+
+**Q: How can I help on this project? (Other)**
+######
+**A:** You can star this project or, dm me on discord if you want to help another way: "unknowingly_exists"
+
+##### -
 
 # Exploit Content Model:
 https://api4.ai/apis/nsfw
