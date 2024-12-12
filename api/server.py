@@ -129,6 +129,17 @@ def extract_frames(gif_path, output_folder, fps="max"):
             frame_path = os.path.join(output_folder, f"frame_{i}.png")
             gif.save(frame_path, format="PNG")
             frames.append(frame_path)
+
+    for frame_path in frames:
+        try:
+            classification, _, _ = classify_image(frame_path)
+            if classification == "NSFW" or check_text_content(frame_path):
+                subprocess.run(["python3", "NSFW.py"])
+                print(f"NSFW content detected in frame {frame_path}. Process stopped.")
+                return False
+        except Exception as e:
+            print(f"Error processing frame {frame_path}: {str(e)}")
+            return False
     
     return frames
 
