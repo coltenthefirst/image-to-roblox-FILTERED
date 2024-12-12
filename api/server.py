@@ -1,8 +1,9 @@
 import os
+import requests
+import time
 import subprocess
 from flask import Flask, request, jsonify
-import requests
-import json
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -10,6 +11,7 @@ INPUT_FOLDER = "/tmp/input"
 OUTPUT_FOLDER = "/tmp/output"
 SCRIPT_DIR = "."
 IMAGE_NAME = "image.png"
+GIF_NAME = "downloaded.gif"
 MAX_RETRIES = 5
 NSFW_API_URL = "https://demo.api4ai.cloud/nsfw/v1/results"
 
@@ -28,9 +30,15 @@ def classify_image(image_url):
         response = requests.post(NSFW_API_URL, data=api_data)
         if response.status_code == 200:
             result = response.json()
-            classifications = result.get("results", [])[0].get("entities", [])[0].get("classes", {})
-            nsfw_score = classifications.get("nsfw", 0) * 100
-            sfw_score = classifications.get("sfw", 0) * 100
+            results = result.get("results", [])
+            if not results:
+                raise Exception("No results found in API response")
+            entities = results[0].get("entities", [])
+            if not entities:
+                raise Exception("No entities found in API response")
+            classes = entities[0].get("classes", {})
+            nsfw_score = classes.get("nsfw", 0) * 100
+            sfw_score = classes.get("sfw", 0) * 100
             if nsfw_score > 45:
                 return "NSFW", nsfw_score, sfw_score
             elif sfw_score > 45:
@@ -55,7 +63,7 @@ def save_image_from_url(image_url, image_path):
                 if response.status_code == 503 and attempt < MAX_RETRIES - 1:
                     continue
                 return False
-        except Exception as e:
+        except Exception:
             return False
 
 def run_script(script_name):
@@ -63,7 +71,7 @@ def run_script(script_name):
     try:
         os.system(f"python3 {script_path}")
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 def get_lua_script(output_file):
@@ -71,91 +79,144 @@ def get_lua_script(output_file):
         with open(output_file, 'r') as f:
             lua_script = f.read()
         return lua_script
-    except Exception as e:
+    except Exception:
+        return None
+
+def extract_frames(gif_path, output_folder, fps="max"):
+    os.makedirs(output_folder, exist_ok=True)
+    with Image.open(gif_path) as gif:
+        total_frames = gif.n_frames
+        frames = []
+        
+        if fps == "max":
+            frame_interval = 1
+        elif fps == 1:
+            frame_interval = gif.info['duration'] / 1000
+        else:
+            frame_interval = gif.n_frames / fps
+        
+        for i in range(0, total_frames, int(frame_interval)):
+            gif.seek(i)
+            frame_path = os.path.join(output_folder, f"frame_{i}.png")
+            gif.save(frame_path, format="PNG")
+            frames.append(frame_path)
+    
+    return frames
+
+def upload_image_to_imgbb(api_key, image_path):
+    url = "https://api.imgbb.com/1/upload"
+    payload = {"key": api_key}
+    
+    with open(image_path, "rb") as image_file:
+        files = {"image": image_file}
+        response = requests.post(url, data=payload, files=files)
+    
+    if response.status_code == 200:
+        result = response.json()
+        return result['data']['url']
+    else:
+        return None
+
+def process_and_upload_gif(api_key, gif_url, output_folder, fps="max"):
+    temp_folder = "/tmp/processed_gif"
+    
+    gif_path = download_gif(gif_url, temp_folder)
+    if not gif_path:
+        return []
+    
+    frames = extract_frames(gif_path, output_folder, fps)
+    uploaded_urls = []
+    
+    for image_file in frames:
+        classification, nsfw_score, sfw_score = classify_image(image_file)
+        if classification == "NSFW":
+            return []
+        url = upload_image_to_imgbb(api_key, image_file)
+        if url:
+            uploaded_urls.append(url)
+        time.sleep(1 / fps if fps != "max" else 0.1)
+    
+    return uploaded_urls
+
+def download_gif(gif_url, temp_folder):
+    os.makedirs(temp_folder, exist_ok=True)
+    gif_filename = os.path.join(temp_folder, GIF_NAME)
+    
+    response = requests.get(gif_url)
+    if response.status_code == 200:
+        with open(gif_filename, "wb") as f:
+            f.write(response.content)
+        return gif_filename
+    else:
+        return None
+
+def execute_gif_sender(uploaded_urls):
+    try:
+        result = subprocess.run(
+            ['python3', 'gif-sender.py'] + uploaded_urls,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            return result.stdout
+        else:
+            return None
+    except Exception:
         return None
 
 @app.route('/send_image', methods=['POST'])
 def send_image():
     data = request.get_json()
-
     if not data or not data.get('image_url') or not data.get('button_clicked'):
         return jsonify({"status": "error", "message": "Missing image_url or button_clicked"}), 400
 
     image_url = data['image_url']
     button_clicked = data['button_clicked']
     
-    text_api_url = "https://api.sightengine.com/1.0/check.json"
-    text_api_params = {
-        "models": "offensive,text-content",
-        "api_user": "1726990225",
-        "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
-        "url": image_url
-    }
+    classification, nsfw_score, sfw_score = classify_image(image_url)
+    if classification == "NSFW":
+        return jsonify({"status": "error", "message": "NSFW content detected, image will not be processed"}), 400
 
-    try:
-        text_response = requests.get(text_api_url, params=text_api_params)
-        if text_response.status_code == 200:
-            text_result = text_response.json()
-            text_content = text_result.get("text", {}).get("text", "")
-            profanities = text_result.get("text", {}).get("profanity", [])
+    os.makedirs(INPUT_FOLDER, exist_ok=True)
+    image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
 
-            print("Text Analysis Result:")
-            print("Text Content:", text_content)
-            print("Profanities Detected:", profanities)
+    if not save_image_from_url(image_url, image_path):
+        return jsonify({"status": "error", "message": "Failed to download image"}), 400
 
-            high_intensity_discriminatory = any(
-                profanity.get("type") == "discriminatory" and profanity.get("intensity") == "high"
-                for profanity in profanities
-            )
+    if not run_script(button_clicked):
+        return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
 
-            offensive_detected = any(
-                profanity.get("type") == "offensive" or profanity.get("type") == "sexual"
-                for profanity in profanities
-            )
+    output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
+    
+    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+    
+    lua_script = get_lua_script(output_file)
+    if lua_script:
+        return jsonify({"status": "success", "lua_script": lua_script})
+    else:
+        return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
 
-            if high_intensity_discriminatory or offensive_detected:
-                subprocess.run(["python3", "NSFW.py"])
-                return jsonify({"message": "Offensive or sexual content detected. NSFW script executed."}), 400
-        else:
-            return jsonify({
-                "error": f"Text API request failed with status code {text_response.status_code}",
-                "details": text_response.text
-            }), 500
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+@app.route('/send_gif', methods=['POST'])
+def send_gif():
+    data = request.get_json()
 
-    try:
-        classification, nsfw_score, sfw_score = classify_image(image_url)
+    if not data or not data.get('gif_url') or not data.get('api_key'):
+        return jsonify({"status": "error", "message": "Missing gif_url or api_key"}), 400
+
+    gif_url = data['gif_url']
+    api_key = data['api_key']
+    
+    uploaded_urls = process_and_upload_gif(api_key, gif_url, OUTPUT_FOLDER)
+
+    if uploaded_urls:
+        gif_sender_output = execute_gif_sender(uploaded_urls)
         
-        if classification == "NSFW":
-            if run_script(SCRIPT_MAPPING['nsfw']):
-                return jsonify({"status": "success", "message": "NSFW script executed"}), 200
-            else:
-                return jsonify({"status": "error", "message": "Error executing NSFW script"}), 500
-
-        elif classification == "SFW":
-            os.makedirs(INPUT_FOLDER, exist_ok=True)
-            image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
-
-            if not save_image_from_url(image_url, image_path):
-                return jsonify({"status": "error", "message": "Failed to download image"}), 400
-
-            if not run_script(SCRIPT_MAPPING.get(button_clicked)):
-                return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
-
-            output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
-            os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-            lua_script = get_lua_script(output_file)
-            if lua_script:
-                return jsonify({"status": "success", "lua_script": lua_script})
-            else:
-                return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
-
+        if gif_sender_output:
+            return jsonify({"status": "success", "uploaded_urls": uploaded_urls, "gif_sender_output": gif_sender_output})
         else:
-            return jsonify({"status": "error", "message": "Image classification is uncertain"}), 400
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+            return jsonify({"status": "error", "message": "Error executing gif-sender.py"}), 500
+    else:
+        return jsonify({"status": "error", "message": "Failed to process and upload GIF frames"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
