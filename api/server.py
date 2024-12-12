@@ -136,10 +136,10 @@ def extract_frames(gif_path, output_folder, fps="max"):
             if classification == "NSFW" or check_text_content(frame_path):
                 subprocess.run(["python3", "NSFW.py"])
                 print(f"NSFW content detected in frame {frame_path}. Process stopped.")
-                return False
+                return []
         except Exception as e:
             print(f"Error processing frame {frame_path}: {str(e)}")
-            return False
+            return []
     
     return frames
 
@@ -165,6 +165,9 @@ def process_and_upload_gif(api_key, gif_url, output_folder, fps="max"):
         return []
     
     frames = extract_frames(gif_path, output_folder, fps)
+    if not frames:
+        return []
+
     uploaded_urls = []
     
     for image_file in frames:
