@@ -1,9 +1,9 @@
 import os
 import requests
-import time
-import subprocess
 from flask import Flask, request, jsonify
 from PIL import Image
+import time
+import subprocess
 
 app = Flask(__name__)
 
@@ -30,15 +30,9 @@ def classify_image(image_url):
         response = requests.post(NSFW_API_URL, data=api_data)
         if response.status_code == 200:
             result = response.json()
-            results = result.get("results", [])
-            if not results:
-                raise Exception("No results found in API response")
-            entities = results[0].get("entities", [])
-            if not entities:
-                raise Exception("No entities found in API response")
-            classes = entities[0].get("classes", {})
-            nsfw_score = classes.get("nsfw", 0) * 100
-            sfw_score = classes.get("sfw", 0) * 100
+            classifications = result.get("results", [])[0].get("entities", [])[0].get("classes", {})
+            nsfw_score = classifications.get("nsfw", 0) * 100
+            sfw_score = classifications.get("sfw", 0) * 100
             if nsfw_score > 45:
                 return "NSFW", nsfw_score, sfw_score
             elif sfw_score > 45:
@@ -63,7 +57,7 @@ def save_image_from_url(image_url, image_path):
                 if response.status_code == 503 and attempt < MAX_RETRIES - 1:
                     continue
                 return False
-        except Exception:
+        except Exception as e:
             return False
 
 def run_script(script_name):
@@ -71,7 +65,7 @@ def run_script(script_name):
     try:
         os.system(f"python3 {script_path}")
         return True
-    except Exception:
+    except Exception as e:
         return False
 
 def get_lua_script(output_file):
@@ -79,7 +73,19 @@ def get_lua_script(output_file):
         with open(output_file, 'r') as f:
             lua_script = f.read()
         return lua_script
-    except Exception:
+    except Exception as e:
+        return None
+
+def download_gif(gif_url, temp_folder):
+    os.makedirs(temp_folder, exist_ok=True)
+    gif_filename = os.path.join(temp_folder, GIF_NAME)
+    
+    response = requests.get(gif_url)
+    if response.status_code == 200:
+        with open(gif_filename, "wb") as f:
+            f.write(response.content)
+        return gif_filename
+    else:
         return None
 
 def extract_frames(gif_path, output_folder, fps="max"):
@@ -128,27 +134,12 @@ def process_and_upload_gif(api_key, gif_url, output_folder, fps="max"):
     uploaded_urls = []
     
     for image_file in frames:
-        classification, nsfw_score, sfw_score = classify_image(image_file)
-        if classification == "NSFW":
-            return []
         url = upload_image_to_imgbb(api_key, image_file)
         if url:
             uploaded_urls.append(url)
         time.sleep(1 / fps if fps != "max" else 0.1)
     
     return uploaded_urls
-
-def download_gif(gif_url, temp_folder):
-    os.makedirs(temp_folder, exist_ok=True)
-    gif_filename = os.path.join(temp_folder, GIF_NAME)
-    
-    response = requests.get(gif_url)
-    if response.status_code == 200:
-        with open(gif_filename, "wb") as f:
-            f.write(response.content)
-        return gif_filename
-    else:
-        return None
 
 def execute_gif_sender(uploaded_urls):
     try:
@@ -172,29 +163,39 @@ def send_image():
 
     image_url = data['image_url']
     button_clicked = data['button_clicked']
-    
-    classification, nsfw_score, sfw_score = classify_image(image_url)
-    if classification == "NSFW":
-        return jsonify({"status": "error", "message": "NSFW content detected, image will not be processed"}), 400
 
-    os.makedirs(INPUT_FOLDER, exist_ok=True)
-    image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
+    try:
+        classification, nsfw_score, sfw_score = classify_image(image_url)
+        
+        if classification == "NSFW":
+            if run_script(SCRIPT_MAPPING['nsfw']):
+                return jsonify({"status": "success", "message": "NSFW script executed"}), 200
+            else:
+                return jsonify({"status": "error", "message": "Error executing NSFW script"}), 500
 
-    if not save_image_from_url(image_url, image_path):
-        return jsonify({"status": "error", "message": "Failed to download image"}), 400
+        elif classification == "SFW":
+            os.makedirs(INPUT_FOLDER, exist_ok=True)
+            image_path = os.path.join(INPUT_FOLDER, IMAGE_NAME)
 
-    if not run_script(button_clicked):
-        return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
+            if not save_image_from_url(image_url, image_path):
+                return jsonify({"status": "error", "message": "Failed to download image"}), 400
 
-    output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
-    
-    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-    
-    lua_script = get_lua_script(output_file)
-    if lua_script:
-        return jsonify({"status": "success", "lua_script": lua_script})
-    else:
-        return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
+            if not run_script(SCRIPT_MAPPING.get(button_clicked)):
+                return jsonify({"status": "error", "message": f"Error executing script for button {button_clicked}"}), 500
+
+            output_file = os.path.join(OUTPUT_FOLDER, IMAGE_NAME.replace('.png', '.lua'))
+            os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+            lua_script = get_lua_script(output_file)
+            if lua_script:
+                return jsonify({"status": "success", "lua_script": lua_script})
+            else:
+                return jsonify({"status": "error", "message": "Error reading Lua script"}), 500
+
+        else:
+            return jsonify({"status": "error", "message": "Image classification is uncertain"}), 400
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/send_gif', methods=['POST'])
 def send_gif():
