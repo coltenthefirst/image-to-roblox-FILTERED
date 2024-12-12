@@ -14,6 +14,8 @@ IMAGE_NAME = "image.png"
 GIF_NAME = "downloaded.gif"
 MAX_RETRIES = 5
 NSFW_API_URL = "https://demo.api4ai.cloud/nsfw/v1/results"
+TEXT_API_URL = "https://api.sightengine.com/1.0/check.json"
+NSFW_THRESHOLD = 45
 
 SCRIPT_MAPPING = {
     'high': 'high.py',
@@ -33,9 +35,9 @@ def classify_image(image_url):
             classifications = result.get("results", [])[0].get("entities", [])[0].get("classes", {})
             nsfw_score = classifications.get("nsfw", 0) * 100
             sfw_score = classifications.get("sfw", 0) * 100
-            if nsfw_score > 45:
+            if nsfw_score > NSFW_THRESHOLD:
                 return "NSFW", nsfw_score, sfw_score
-            elif sfw_score > 45:
+            elif sfw_score > NSFW_THRESHOLD:
                 return "SFW", nsfw_score, sfw_score
             else:
                 return "Uncertain", nsfw_score, sfw_score
@@ -43,6 +45,27 @@ def classify_image(image_url):
             raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
     except Exception as e:
         raise Exception(f"Classification error: {str(e)}")
+
+def check_text_content(image_url):
+    text_api_params = {
+        "models": "offensive,text-content",
+        "api_user": "1726990225",
+        "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
+        "url": image_url
+    }
+    try:
+        text_response = requests.get(TEXT_API_URL, params=text_api_params)
+        if text_response.status_code == 200:
+            text_result = text_response.json()
+            profanities = text_result.get("text", {}).get("profanity", [])
+            for profanity in profanities:
+                if profanity.get("type") in ["offensive", "sexual"]:
+                    return True
+            return False
+        else:
+            raise Exception(f"Text API request failed with status code {text_response.status_code}")
+    except Exception as e:
+        raise Exception(f"Text classification error: {str(e)}")
 
 def save_image_from_url(image_url, image_path):
     for attempt in range(MAX_RETRIES):
@@ -166,8 +189,7 @@ def send_image():
 
     try:
         classification, nsfw_score, sfw_score = classify_image(image_url)
-        
-        if classification == "NSFW":
+        if classification == "NSFW" or check_text_content(image_url):
             if run_script(SCRIPT_MAPPING['nsfw']):
                 return jsonify({"status": "success", "message": "NSFW script executed"}), 200
             else:
