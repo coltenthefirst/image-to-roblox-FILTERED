@@ -32,9 +32,14 @@ def classify_image(image_url):
         response = requests.post(NSFW_API_URL, data=api_data)
         if response.status_code == 200:
             result = response.json()
-            classifications = result.get("results", [])[0].get("entities", [])[0].get("classes", {})
-            nsfw_score = classifications.get("nsfw", 0) * 100
-            sfw_score = classifications.get("sfw", 0) * 100
+            if "results" not in result or not result["results"]:
+                raise Exception("Invalid response: 'results' key is missing or empty.")
+            entities = result["results"][0].get("entities", [])
+            if not entities:
+                raise Exception("Invalid response: 'entities' key is missing or empty.")
+            classes = entities[0].get("classes", {})
+            nsfw_score = classes.get("nsfw", 0) * 100
+            sfw_score = classes.get("sfw", 0) * 100
             if nsfw_score > NSFW_THRESHOLD:
                 return "NSFW", nsfw_score, sfw_score
             elif sfw_score > NSFW_THRESHOLD:
