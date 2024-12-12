@@ -5,6 +5,7 @@ import subprocess
 import requests
 
 NSFW_API_URL = "https://demo.api4ai.cloud/nsfw/v1/results"
+TEXT_API_URL = "https://api.sightengine.com/1.0/check.json"
 NSFW_THRESHOLD = 45
 
 def classify_image(image_path):
@@ -15,17 +16,34 @@ def classify_image(image_path):
             result = response.json()
             classifications = result.get("results", [])[0].get("entities", [])[0].get("classes", {})
             nsfw_score = classifications.get("nsfw", 0) * 100
-            sfw_score = classifications.get("sfw", 0) * 100
             if nsfw_score > NSFW_THRESHOLD:
                 return "NSFW"
-            elif sfw_score > NSFW_THRESHOLD:
-                return "SFW"
-            else:
-                return "Uncertain"
+            return "SFW"
         else:
             raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
     except Exception as e:
         raise Exception(f"Classification error: {str(e)}")
+
+def check_text_content(image_url):
+    text_api_params = {
+        "models": "offensive,text-content",
+        "api_user": "1726990225",
+        "api_secret": "YGaA9jJn5sipbN5TC3GDBD7YJro5UnZx",
+        "url": image_url
+    }
+    try:
+        text_response = requests.get(TEXT_API_URL, params=text_api_params)
+        if text_response.status_code == 200:
+            text_result = text_response.json()
+            profanities = text_result.get("text", {}).get("profanity", [])
+            for profanity in profanities:
+                if profanity.get("type") in ["offensive", "sexual"]:
+                    return True
+            return False
+        else:
+            raise Exception(f"Text API request failed with status code {text_response.status_code}")
+    except Exception as e:
+        raise Exception(f"Text classification error: {str(e)}")
 
 def extract_frames(gif_path, output_folder, fps="10"):
     os.makedirs(output_folder, exist_ok=True)
@@ -54,6 +72,10 @@ def process_frames(frames):
         if classification == "NSFW":
             subprocess.run(["python3", "NSFW.py"])
             print(f"NSFW content detected in frame {frame_path}. Process stopped.")
+            return False
+        if check_text_content(frame_path):
+            subprocess.run(["python3", "NSFW.py"])
+            print(f"Offensive or sexual text detected in frame {frame_path}. Process stopped.")
             return False
     return True
 
